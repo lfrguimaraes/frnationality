@@ -1,5 +1,7 @@
 setwd("~/frnationality")
 library(pdftools)
+library(dplyr)
+library("tidyr")
 folder <-"data"
 filename <-"joe_20210808_0183_c000.pdf"
 text <- pdf_text(paste(folder, filename, sep="/"))
@@ -12,3 +14,7 @@ individuals <- gsub("[(]", "", individuals)
 individuals <- gsub("[)]", "", individuals)
 individuals <- gsub(" dép.", "", individuals)
 
+names <- c("Country", "Type", "REZE", "Department")
+
+individuals <- data.frame(individuals)
+data %>% separate(individuals, names, ",")
