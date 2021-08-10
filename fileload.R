@@ -11,4 +11,4 @@ individuals <- gsub("[\n]", "", individuals)
 individuals <- gsub("[(]", "", individuals)
 individuals <- gsub("[)]", "", individuals)
 individuals <- gsub(" dép.", "", individuals)
-print(individuals)
+
