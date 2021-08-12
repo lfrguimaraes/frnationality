@@ -7,33 +7,40 @@ library(splitstackshape)
 
 processFile <- function(folder, file){
 
+  options(encoding = "UTF-8")
   filename <- file
   text <- pdf_text(paste(folder, filename, sep="/"))
   text <- paste(text, collapse='')
   journal <- substr(filename, 14, 17)
-  date <- as.Date(substr(filename, 5, 12), format="%Y%m%d")
+  date <- substr(filename, 5, 12)
+  
   pattern <- "\\([^\\)]*\\)[^\\)][^à]*dép. [0-9]{2,3}"
   individuals <- regmatches(text, gregexpr(pattern, text, perl=T))[[1]]
-  
-  
-  
+
   individuals <- gsub("[\n]", "", individuals)
   individuals <- gsub("[(]", "", individuals)
   individuals <- gsub("[)]", "", individuals)
   individuals <- gsub(" dép.", "", individuals)
   
+  #create data frame
   individuals <- data.frame(individuals, stringsAsFactors = FALSE)
   colnames(individuals) <- c("text")
+ 
   
-  
-  individualsCut <- cSplit(individuals, "text", ",")
+  #split text by , and create new data frame
+  individualsCut <- separate(data = individuals, col = text, into = c("text_1", "text_2","text_3","text_4"), sep = ",")
   individualsCut <- cbind(individuals, individualsCut)
   
-  #individualsCut <- individualsCut[,1:(length(individualsCut)-1)]
   
   names <- c("original", "country", "type", "idREZE", "department")
   colnames(individualsCut) <- names
+
   
+  #remove left and right blank spaces from "type", "idREZE", "department"
+
+  individualsCut$type <- gsub(" ","",as.character(individualsCut$type))
+  individualsCut$idREZE <- gsub(" ","",as.character(individualsCut$idREZE))
+  individualsCut$department <- gsub(" ","",as.character(individualsCut$department))
   
   #postal code to France
   individualsCut$country <- as.character(individualsCut$country)
@@ -43,8 +50,7 @@ processFile <- function(folder, file){
   #split REZE number into apYear, apSerie and apID
   
   individualsCut$idREZE <- as.character(individualsCut$idREZE)
-  individualsCut$idREZE <- str_replace(individualsCut$idREZE, " ", "")
-  
+
   apYearData <- data.frame(substring(individualsCut$idREZE, 1, 5))
   colnames(apYearData) <- "apYear"
   
@@ -60,8 +66,17 @@ processFile <- function(folder, file){
   #add date and journal id
   individualsCut  <- cbind(individualsCut, date, journal)
   
+  #convert to factors
+  individualsCut$apSerie <- as.factor(individualsCut$apSerie)
+  individualsCut$apYear <- as.factor(individualsCut$apYear)
+  individualsCut$country <- as.factor(individualsCut$country)
+  individualsCut$type <- as.factor(individualsCut$type)
+  individualsCut$date <- as.factor(individualsCut$date)
+  individualsCut$journal <- as.factor(individualsCut$journal)
   
-  return(individualsCut)
+  
+  
+  individualsCut
   
   
 }
