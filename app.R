@@ -26,7 +26,7 @@ ui <- fluidPage(
                         value = 30),
             actionButton(inputId = "reprocessButton", "Reprocess"),
             checkboxInput("","Force All"),
-            selectInput(inputId = "countryInput", "Serie", choices = c("France", "Brésil", "Argentina"))
+            selectInput(inputId = "countryInput", "Serie", choices = c("All", "France", "Brésil", "Argentina"), )
         ),
 
         # Show a plot of the generated distribution
@@ -44,7 +44,9 @@ server <- function(input, output) {
 
     
     output$dataTidy <- renderDataTable(
-        outputData <- outputData[outputData$"Birth Country"==input$countryInput,]
+        
+        if(input$countryInput!="All")outputDataShow <- outputData[outputData$"Birth Country"==input$countryInput,]
+        else outputDataShow <- outputData
         
         )
     

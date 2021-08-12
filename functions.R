@@ -4,7 +4,18 @@ library(tidyr)
 library(stringr)
 library(splitstackshape)
 
-
+reprocess <- function(folder){
+  
+  #busca arquivos na pasta, processa e junta no arquivo do dia
+  #se nao existir arquivo do dia, pega o de ontem
+  #se nao existir o de ontem, cria do zero, com todos os da pasta _processed e junta com os da pasta toprocess
+  #adicionar data de processamento
+  
+  
+  
+  
+}
+  
 processFile <- function(folder, file){
 
   options(encoding = "UTF-8")
