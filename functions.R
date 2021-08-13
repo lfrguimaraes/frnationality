@@ -3,17 +3,70 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(splitstackshape)
+library(bizdays)
+library(logr)
+library(filesstrings)
 
-reprocess <- function(folder){
+
+
+addLog <- function(textLog, folderLog=NULL){
+  library(logr)
+  if(is.null(folderLog))folderLog <- "log"
   
-  #busca arquivos na pasta, processa e junta no arquivo do dia
-  #se nao existir arquivo do dia, pega o de ontem
-  #se nao existir o de ontem, cria do zero, com todos os da pasta _processed e junta com os da pasta toprocess
-  #adicionar data de processamento
+  filepath <- str_c(folderLog,"LOG.txt", sep="/")
+  textLog <- str_c(date(),textLog, sep="-")
+  
+  logFile <- log_open(filepath)
+  log_print(textLog)
+  log_close()
+  
+}
   
   
+reprocess <- function(folderToProcess, folderProcessed, folderTidy){
+  
+  source("functions.R")
+  library(pdftools)
+  library(dplyr)
+  library(tidyr)
+  library(stringr)
+  library(splitstackshape)
+  library(bizdays)
+  library(logr)
+  library(filesstrings)
+  folderToProcess = "data/pdf_toprocess"
+  folderProcessed = "data/pdf_processed"
+  folderTidy = "data/daily"
+  
+  filesToProcess <- list.files(folderToProcess, pattern=NULL, all.files=FALSE, full.names=FALSE)
+  
+  tidyFile <- list.files(folderTidy, pattern=NULL, all.files=FALSE, full.names=FALSE)
+  
+  dataTidy <- data.frame()
+  
+  if(length(filesToProcess)>1){
+    for (file in filesToProcess) {
+      result <- processFile(folderToProcess, file)
+      addLog(str_c("File processed: ",file, ". ", nrow(result), " lines processed.", sep =""))
+      filePathToProcess <- str_c(folderToProcess,file, sep="/")
+      file.move(filePathToProcess, folderProcessed)
+      dataTidy <- rbind(dataTidy, result)
+    }
+    
+  }else return("No new file to process")
+  
+  if(tidyFile!=""){
+    filepath <- str_c(folderTidy,tidyFile, sep="/")
+    dataTidyFile <- read.csv(filepath)
+    dataTidyFile <- dataTidyFile[,-c(1)]
+    dataTidy <- rbind(dataTidy, dataTidyFile)
+    dataTidy <- dataTidy[!duplicated(dataTidy$original),]
+  }
+  
+  write.csv(dataTidy, )
   
   
+
 }
   
 processFile <- function(folder, file){
@@ -75,7 +128,8 @@ processFile <- function(folder, file){
   
   
   #add date and journal id
-  individualsCut  <- cbind(individualsCut, date, journal)
+  processDate <-date()
+  individualsCut  <- cbind(individualsCut, date, journal, filename, processDate)
   
   #convert to factors
   individualsCut$apSerie <- as.factor(individualsCut$apSerie)
