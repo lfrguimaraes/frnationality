@@ -52,7 +52,7 @@ reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NUL
       result <- processFile(folderToProcess, file)
       addLog(str_c("File processed: ",file, ". ", nrow(result), " lines processed.", sep =""))
       filePathToProcess <- str_c(folderToProcess,file, sep="/")
-      file.move(filePathToProcess, folderProcessed)
+      file.move(filePathToProcess, folderProcessed, overwrite = TRUE)
       dataTidy <- rbind(dataTidy, result)
     }
     
@@ -60,7 +60,7 @@ reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NUL
   
   if(hasTidyDataFile()){
     fileTidyPath <- str_c(folderTidy,tidyFile, sep="/")
-    dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
+    dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
     dataTidyFile <- dataTidyFile[,-c(1)]
     dataTidy <- rbind(dataTidy, dataTidyFile)
     
@@ -76,8 +76,7 @@ reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NUL
     write.csv(dataTidy, fileTidyPath)
   }
 
-  
-  
+
 
 }
 
@@ -148,7 +147,7 @@ processFile <- function(folder, file){
   
   individualsCut$idREZE <- as.character(individualsCut$idREZE)
 
-  apYearData <- data.frame(substring(individualsCut$idREZE, 1, 5))
+  apYearData <- data.frame(substring(individualsCut$idREZE, 1, 4))
   colnames(apYearData) <- "apYear"
   
   apSerieData <- data.frame(substring(individualsCut$idREZE, 6, 8))
