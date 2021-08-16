@@ -19,45 +19,64 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30),
+       
             actionButton(inputId = "reprocessButton", "Reprocess"),
-            checkboxInput("","Force All"),
-            selectInput(inputId = "countryInput", "Serie", choices = c("All", "France", "Brésil", "Argentina"), )
+            selectInput(inputId = "countryInput", "Country", choices = c("All", "France", "Brésil", "Argentine") )
         ),
+        
+
 
         # Show a plot of the generated distribution
         mainPanel(
            plotOutput("distPlot"),
-           dataTableOutput("dataTidy")
+           dataTableOutput("dataTable")
         )
     )
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
     
-    outputData <- mainExecute()
+    if(hasTidyDataFile()){
+        outputData <- getTidyData()
+        fullData <- reactiveValues(data=outputData)
+        
+    }
+    
+
 
     
-    output$dataTidy <- renderDataTable(
+    output$dataTable <- renderDataTable(
         
-        if(input$countryInput!="All")outputDataShow <- outputData[outputData$"Birth Country"==input$countryInput,]
-        else outputDataShow <- outputData
+        if(hasTidyDataFile()){
+            outputData<-fullData$data
+            if(input$countryInput!="All")outputDataShow <- outputData[outputData$"Birth Country"==input$countryInput,]
+            else outputDataShow <- outputData
+        }
         
         )
     
     output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+           })
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    observeEvent(input$reprocessButton, {
+        
+        reprocess()
+        if(hasTidyDataFile()){
+            fullData$data <- getTidyData()
+        }
+        
     })
+
+    observe({
+        outputData<-fullData$data
+        listCountries <- levels(outputData$"Birth Country")
+        updateSelectInput(session, input$countryInput, choices = c("1","2","3"))
+    })
+    
+    
+    
+    
 }
 
 # Run the application 

@@ -23,7 +23,7 @@ addLog <- function(textLog, folderLog=NULL){
 }
   
   
-reprocess <- function(folderToProcess, folderProcessed, folderTidy){
+reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NULL){
   
   source("functions.R")
   library(pdftools)
@@ -34,9 +34,12 @@ reprocess <- function(folderToProcess, folderProcessed, folderTidy){
   library(bizdays)
   library(logr)
   library(filesstrings)
-  folderToProcess = "data/pdf_toprocess"
-  folderProcessed = "data/pdf_processed"
-  folderTidy = "data/daily"
+  folderToProcess <- "data/pdf_toprocess"
+  folderProcessed <- "data/pdf_processed"
+  folderTidy <- "data/daily"
+  fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
+  
+
   
   filesToProcess <- list.files(folderToProcess, pattern=NULL, all.files=FALSE, full.names=FALSE)
   
@@ -44,7 +47,7 @@ reprocess <- function(folderToProcess, folderProcessed, folderTidy){
   
   dataTidy <- data.frame()
   
-  if(length(filesToProcess)>1){
+  if(length(filesToProcess)>=1){
     for (file in filesToProcess) {
       result <- processFile(folderToProcess, file)
       addLog(str_c("File processed: ",file, ". ", nrow(result), " lines processed.", sep =""))
@@ -53,21 +56,51 @@ reprocess <- function(folderToProcess, folderProcessed, folderTidy){
       dataTidy <- rbind(dataTidy, result)
     }
     
-  }else return("No new file to process")
+  }else addLog("No new files to process")
   
-  if(tidyFile!=""){
-    filepath <- str_c(folderTidy,tidyFile, sep="/")
-    dataTidyFile <- read.csv(filepath)
+  if(hasTidyDataFile()){
+    fileTidyPath <- str_c(folderTidy,tidyFile, sep="/")
+    dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
     dataTidyFile <- dataTidyFile[,-c(1)]
     dataTidy <- rbind(dataTidy, dataTidyFile)
-    dataTidy <- dataTidy[!duplicated(dataTidy$original),]
+    
   }
   
-  write.csv(dataTidy, )
+  if(length(dataTidy)>0){
+    duplicates <- data.frame()
+    duplicates <- data.frame(duplicated(dataTidy$original))
+    colnames(duplicates) <- c("checkDuplicates")
+    addLog(str_c("Removed duplicates from data frame.", length(duplicates$checkDuplicates[duplicates$checkDuplicates == TRUE]), " lines removed", sep =""))
+    dataTidy <- dataTidy[!duplicated(dataTidy$original),]
+    
+    write.csv(dataTidy, fileTidyPath)
+  }
+
   
   
 
 }
+
+getTidyData <- function(file=NULL){
+  folderTidy <- "data/daily"
+  fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
+  dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
+  dataTidyFile <- dataTidyFile[,-c(1,2,5,9,12,13)]
+  colnames(dataTidyFile) <- c("Birth Country","App. Type","App. Department","App. Year","App. Serie", "Publish Date", "Publish Journal")
+  
+  return (dataTidyFile)
+  
+}
+
+hasTidyDataFile <- function(file=NULL){
+  folderTidy <- "data/daily"
+  fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
+  tidyFile <- list.files(folderTidy, pattern=NULL, all.files=FALSE, full.names=FALSE)
+  
+  if(length(tidyFile)>0) return (TRUE)
+  else return (FALSE)
+}
+  
   
 processFile <- function(folder, file){
 
