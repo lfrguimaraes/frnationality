@@ -1,19 +1,19 @@
-=========================================================================
-Log Path: log/log/LOG.txt.log
-Working Directory: C:/Users/lf.guimaraes/Documents/frnationality
-User Name: LF.Guimaraes
-R Version: 4.1.1 (2021-08-10)
-Machine: NX-FR-LT131 x86-64
-Operating System: Windows 10 x64 build 19042
-Log Start Time: 2021-08-16 17:32:41
-=========================================================================
+========================================================================= 
+Log Path: log/log/LOG.txt.log 
+Working Directory: /Users/luiz/Repositories/frnationality 
+User Name: luiz 
+R Version: 4.0.1 (2020-06-06) 
+Machine: MBP-de-Luiz x86_64 
+[1] "Operating System: Darwin 20.3.0 Darwin Kernel Version 20.3.0: Thu Jan 21 00:07:06 PST 2021; root:xnu-7195.81.3~1/RELEASE_X86_64"
+Log Start Time: 2021-08-18 12:36:37 
+========================================================================= 
 
-Mon Aug 16 17:32:41 2021-Removed duplicates from data frame.1003 lines removed
+Wed Aug 18 12:36:37 2021-Removed duplicates from data frame.115 lines removed 
 
-NOTE: Log Print Time:  2021-08-16 17:32:41
-NOTE: Elapsed Time in seconds: 0.00100088119506836
+NOTE: Log Print Time:  2021-08-18 12:36:37 
+NOTE: Elapsed Time in seconds: 0.000432968139648438 
 
-=========================================================================
-Log End Time: 2021-08-16 17:32:41
-Log Elapsed Time: 0 00:00:00
-=========================================================================
+========================================================================= 
+Log End Time: 2021-08-18 12:36:37 
+Log Elapsed Time: 0 00:00:00 
+========================================================================= 

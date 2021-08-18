@@ -1,5 +1,4 @@
-source("main.R")
-#
+
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
 #
@@ -7,6 +6,7 @@ source("main.R")
 #
 #    http://shiny.rstudio.com/
 #
+source("functions.R")
 library(plyr)
 library(dplyr)
 library(ggplot2)
@@ -21,52 +21,91 @@ ui <- fluidPage(
     navbarPage("FR Nat.",
                tabPanel("Summary",
                         plotOutput("distPlot"),
+                        mainPanel(
+                            selectizeInput("selectDepartment", "Department", choices = NULL, multiple = TRUE),
+                            selectizeInput("selectYear", "Year", choices = NULL, multiple = TRUE)
+     
+                            
+                        ),
+                        
                         dataTableOutput("dataTable")
                         ),
                tabPanel("Data upload",
-                        fileInput("file_input", "Choose pdf File",
-                                  multiple = FALSE,
-                                  accept = c("pdf")),
-                        actionButton(inputId = "reprocessButton", "Reprocess"),
+                        
+                        sidebarPanel(
+                            fileInput("file_input", "Choose JORF .pdf file to upload",
+                                      multiple = FALSE,
+                                      accept = c("pdf")),
+                            actionButton(inputId = "reprocessButton", "Reprocess")
+                        ),
+                        mainPanel(
+                            
+                            verbatimTextOutput("outPutFilesToProcess"),
+                            
+                            verbatimTextOutput("outPutFilesProcessed")
+                            
+                        )
+
                         
                         )
                
     )
-    #,
-    # Sidebar with a slider input for number of bins 
-    # sidebarLayout(
-    #     sidebarPanel(
-    #    
-    #         actionButton(inputId = "reprocessButton", "Reprocess"),
-    #         
-    #     ),
-    #     
-    # 
-    # 
-    #     # Show a plot of the generated distribution
-    #     mainPanel(
-    #        plotOutput("distPlot"),
-    #        dataTableOutput("dataTable")
-    #     )
-    # )
+
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     
+    #initialize data
     if(hasTidyDataFile()){
         outputData <- getTidyData()
         fullData <- reactiveValues(data=outputData)
+        tempFullData <- reactiveValues(data=outputData)
+    }
+    
+    filesToProcess <- getFilesToProcess()
+    reactFilesToProcess <- reactiveValues(data=filesToProcess)
+    
+    filesProcessed <- getFilesProcessed()
+    reactFilesProcessed <- reactiveValues(data=filesProcessed)
+    
+    
+    
+
+    #Outputs
+
+    
+    output$outPutFilesToProcess <- renderText({
+        filesToProcess <- reactFilesToProcess$data
+        
+        if(length(filesToProcess)>0) filesToProcess <- paste(c("Files waiting proccesing: \n", filesToProcess), collapse="\n")
+        else filesToProcess <- "No files to process"
+        
+        
+        
+    }
+    )
+    output$outPutFilesProcessed <- renderText({
+        filesProcessed <- reactFilesProcessed$data
+        
+        filesProcessed <- paste(filesProcessed$filename, " (" ,filesProcessed$processDate,")")
+        
+        if(length(filesProcessed)>0) paste(c("Files processed: \n", filesProcessed), collapse="\n")
+        else filesProcessed <- "No files processed"
+        
+        
         
     }
     
-
-
+    )
     
     output$dataTable <- renderDataTable(
         
         if(hasTidyDataFile()){
-            outputData<-fullData$data
+ 
+            tableData <- tempFullData$data
+            
+      
 
         }
         
@@ -74,9 +113,9 @@ server <- function(input, output, session) {
     
     output$distPlot <- renderPlot({
         
-        chartData <-fullData$data
-        chartData$year <- chartData$"App. Year"
-        chartData$serie <- chartData$"App. Serie"
+        chartData <-tempFullData$data
+        chartData$year <- chartData$Year
+        chartData$serie <- chartData$Serie
         
 
         ggplot(chartData, aes(x = serie, fill = year)) + geom_bar(position = position_dodge()) + theme_classic()
@@ -89,21 +128,62 @@ server <- function(input, output, session) {
         if(hasTidyDataFile()){
             fullData$data <- getTidyData()
         }
-        
+        reactFilesToProcess$data <- getFilesToProcess()
+        reactFilesProcessed$data <- getFilesProcessed()
     })
+    
+    observe({
+        tempFullData <- reactiveValues(data=fullData$data)
+    })
+    
 
     observe({
-        outputData<-fullData$data
-        listCountries <- levels(outputData$"Birth Country")
-        updateSelectInput(session, input$countryInput, choices = c("1","2","3"))
+        
+        outputData <- data.frame(fullData$data)
+        outputDataDepartments <- unique(outputData[,3])
+        outputDataYears <- unique(outputData[,4])
+        
+        updateSelectizeInput(session,"selectDepartment",choices = outputDataDepartments)
+        updateSelectizeInput(session,"selectYear",choices = outputDataYears)
+       
     })
+    
+    observe({
+        
+        outputData <- fullData$data
+        
+        selectedDepartments <- input$selectDepartment
+        selectedYears <- input$selectYear
+        
+        if(length(selectedDepartments)>0){
+            outputData <- filter(outputData, Department %in% selectedDepartments)
+        }
+        
+        if(length(selectedYears)>0){
+            outputData <- filter(outputData, Year %in% selectedYears)
+        }
+        
+        tempFullData$data <- outputData
+        
+
+        
+    })
+    
+
     
     observe({
         req(input$file_input)
         filePath<-str_c("data/pdf_toprocess",input$file_input$name, sep="/")
         print(filePath)
         file.copy(input$file_input$datapath,filePath, overwrite = T)
+        reactFilesToProcess$data <- getFilesToProcess()
+        reactFilesProcessed$data <- getFilesProcessed()
+        
         })
+    
+    
+
+
     
     
     

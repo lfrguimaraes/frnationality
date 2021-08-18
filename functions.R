@@ -1,3 +1,4 @@
+
 library(pdftools)
 library(dplyr)
 library(tidyr)
@@ -21,19 +22,30 @@ addLog <- function(textLog, folderLog=NULL){
   log_close()
   
 }
+
+getFilesToProcess <- function(folder=NULL){
+  filesToProcess <- list.files(folderToProcess, pattern=NULL, all.files=FALSE, full.names=FALSE)
+  
+}
+
+getFilesProcessed <- function(folder=NULL){
+  
+  folderTidy <- "data/daily"
+  fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
+  dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
+  dataTidyFile <- dataTidyFile[,c(12,13)]
+  dataTidyFile <- dataTidyFile[!duplicated(dataTidyFile$filename),]
+
+  
+  return (dataTidyFile)
+
+  
+}
   
   
 reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NULL){
   
-  source("functions.R")
-  library(pdftools)
-  library(dplyr)
-  library(tidyr)
-  library(stringr)
-  library(splitstackshape)
-  library(bizdays)
-  library(logr)
-  library(filesstrings)
+
   folderToProcess <- "data/pdf_toprocess"
   folderProcessed <- "data/pdf_processed"
   folderTidy <- "data/daily"
@@ -52,7 +64,7 @@ reprocess <- function(folderToProcess=NULL, folderProcessed=NULL, folderTidy=NUL
       result <- processFile(folderToProcess, file)
       addLog(str_c("File processed: ",file, ". ", nrow(result), " lines processed.", sep =""))
       filePathToProcess <- str_c(folderToProcess,file, sep="/")
-      file.move(filePathToProcess, folderProcessed, overwrite = TRUE)
+      file.remove(filePathToProcess)
       dataTidy <- rbind(dataTidy, result)
     }
     
@@ -85,7 +97,7 @@ getTidyData <- function(file=NULL){
   fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
   dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
   dataTidyFile <- dataTidyFile[,-c(1,2,5,9,12,13)]
-  colnames(dataTidyFile) <- c("Birth Country","App. Type","App. Department","App. Year","App. Serie", "Publish Date", "Publish Journal")
+  colnames(dataTidyFile) <- c("Birth Country","Type","Department","Year","Serie", "Publish Date", "Publish Journal")
   
   return (dataTidyFile)
   
