@@ -8,6 +8,11 @@ library(bizdays)
 library(logr)
 library(filesstrings)
 
+configFolderToProcess <- "data/pdf_toprocess"
+configFolderProcessed <- "data/pdf_processed"
+configFolderLog <- "log"
+configFolderTidy <- "data/daily"
+configTidyFileName <- "daily.csv"
 
 
 addLog <- function(textLog, folderLog=NULL){
@@ -24,6 +29,7 @@ addLog <- function(textLog, folderLog=NULL){
 }
 
 getFilesToProcess <- function(folder=NULL){
+  folderToProcess <- "data/pdf_toprocess"
   filesToProcess <- list.files(folderToProcess, pattern=NULL, all.files=FALSE, full.names=FALSE)
   
 }
@@ -97,7 +103,7 @@ getTidyData <- function(file=NULL){
   fileTidyPath <- str_c(folderTidy,"daily.csv", sep="/") 
   dataTidyFile <- read.csv(fileTidyPath, colClasses=c("character","character","factor","factor","character","character","factor","factor","character","factor","factor","character","character"))
   dataTidyFile <- dataTidyFile[,-c(1,2,5,9,12,13)]
-  colnames(dataTidyFile) <- c("Birth Country","Type","Department","Year","Serie", "Publish Date", "Publish Journal")
+  colnames(dataTidyFile) <- c("Country","Type","Department","Year","Serie", "Publish Date", "Journal")
   
   return (dataTidyFile)
   
