@@ -58,12 +58,12 @@ ui <- fluidPage(
                             fileInput("file_input", "Choose JORF .pdf file to upload",
                                       multiple = FALSE,
                                       accept = c("pdf")),
-                            actionButton(inputId = "reprocessButton", "Reprocess"),                        
+                            #actionButton(inputId = "reprocessButton", "Reprocess"),                        
                             
                         ),
 
                             
-                            verbatimTextOutput("outPutFilesToProcess"),
+                            #verbatimTextOutput("outPutFilesToProcess"),
                             
                             verbatimTextOutput("outPutFilesProcessed")
                             
@@ -246,8 +246,19 @@ server <- function(input, output, session) {
         filePath<-str_c("data/pdf_toprocess",input$file_input$name, sep="/")
         print(filePath)
         file.copy(input$file_input$datapath,filePath, overwrite = T)
-        reactFilesToProcess$data <- getFilesToProcess()
-        reactFilesProcessed$data <- getFilesProcessed()
+        withProgress(message = "Processing Files...", min = 1, max = 4, {
+          
+          incProgress(amount = 1)
+          reprocess()
+          incProgress(amount = 2)
+          if(hasTidyDataFile()){
+            fullData$data <- getTidyData()
+          }
+          incProgress(amount = 3)
+          reactFilesToProcess$data <- getFilesToProcess()
+          reactFilesProcessed$data <- getFilesProcessed()
+          incProgress(amount = 4)
+        })
         
         })
     

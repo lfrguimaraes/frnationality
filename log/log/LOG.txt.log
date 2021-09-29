@@ -3,17 +3,17 @@ Log Path: log/log/LOG.txt.log
 Working Directory: /Users/luiz/Repositories/frnationality 
 User Name: luiz 
 R Version: 4.0.1 (2020-06-06) 
-Machine: MacBook-Pro-de-Luiz.local x86_64 
-[1] "Operating System: Darwin 20.3.0 Darwin Kernel Version 20.3.0: Thu Jan 21 00:07:06 PST 2021; root:xnu-7195.81.3~1/RELEASE_X86_64"
-Log Start Time: 2021-09-02 12:08:11 
+Machine: MBP-de-Luiz x86_64 
+[1] "Operating System: Darwin 20.6.0 Darwin Kernel Version 20.6.0: Mon Aug 30 06:12:21 PDT 2021; root:xnu-7195.141.6~3/RELEASE_X86_64"
+Log Start Time: 2021-09-29 14:09:57 
 ========================================================================= 
 
-Thu Sep  2 12:08:11 2021-Removed duplicates from data frame.1837 lines removed 
+Wed Sep 29 14:09:57 2021-Removed duplicates from data frame.643 lines removed 
 
-NOTE: Log Print Time:  2021-09-02 12:08:11 
-NOTE: Elapsed Time in seconds: 0.000651836395263672 
+NOTE: Log Print Time:  2021-09-29 14:09:57 
+NOTE: Elapsed Time in seconds: 0.000466823577880859 
 
 ========================================================================= 
-Log End Time: 2021-09-02 12:08:11 
+Log End Time: 2021-09-29 14:09:57 
 Log Elapsed Time: 0 00:00:00 
 ========================================================================= 
